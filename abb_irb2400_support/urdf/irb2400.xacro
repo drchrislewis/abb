@@ -1,6 +1,56 @@
 <?xml version="1.0" ?>
 
 <robot name="abb_irb2400" xmlns:xacro="http://ros.org/wiki/xacro">
-	<xacro:include filename="$(find abb_irb2400_support)/urdf/irb2400_macro.xacro"/>
-	<xacro:abb_irb2400 prefix=""/>
+  <xacro:include filename="$(find abb_irb2400_support)/urdf/irb2400_macro.xacro"/>
+  <xacro:include filename="$(find industrial_extrinsic_cal)/urdf/calibration_transform_macro.xacro"/>
+  <xacro:include filename="$(find industrial_extrinsic_cal)/urdf/basler_cal_macro.xacro"/>
+  <xacro:include filename="$(find industrial_extrinsic_cal)/urdf/asus_sensor_cal_macro.xacro"/>
+  <xacro:include filename="$(find industrial_extrinsic_cal)/urdf/ifm_cal_macro.xacro"/>
+  <xacro:include filename="$(find industrial_extrinsic_cal)/urdf/astra_cal_macro.xacro"/>
+  
+  <xacro:abb_irb2400 prefix=""/>
+
+  <link name="world"/>
+  <link name="target_frame" /> 
+
+  <!-- attach robot to world -->
+  <joint name="world_to_robot" type="fixed">
+    <parent link="world"/>
+    <child  link="base_link"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+
+  <!-- frame for truncated signed distance data (TSDF) -->
+  <link name="tsdf_frame"/>
+  <!-- attach tsdf_frame to world -->
+  <joint name="tsdf_to_world" type="fixed">
+    <parent link="world"/>
+    <child link="tsdf_frame"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+
+  <!-- add target to the workcell with a set of calibrate-able joints -->
+  <!-- These are the joint names
+      target_frame_x_joint
+      target_frame_y_joint
+      target_frame_z_joint
+      target_frame_yaw_joint
+      target_frame_pitch_joint
+      target_frame_roll_joint
+  -->
+
+  <xacro:calibration_definitions child_link="target_frame" parent_link="world"/>
+
+  <!-- add a camera camera attached to the wrist with a set of calibrate-able joints --> 
+      <!-- The joint names are:
+         astra_x_joint
+         astra_y_joint
+         astra_z_joint
+         astra_yaw_joint
+         astra_pitch_joint
+         astra_roll_joint    
+  -->
+  <xacro:astra_sensor_definitions prefix="astra" parent_link="tool0"/>
+
+  
 </robot>
