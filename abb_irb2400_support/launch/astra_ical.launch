@@ -1,0 +1,40 @@
+<launch>
+
+  <!-- arguments for joint_traj node -->
+  <arg name="input_file" default="$(find abb_irb2400_support)/yaml/ical_traj.yaml"/>     <!-- where to load the initial joint trajectory -->
+  <arg name="output_file" default="$(find abb_irb2400_support)/yaml/ical_traj_new.yaml"/>    <!-- where to save the final joint trajectory   -->
+  <arg name="joints_topic" default="/abb/joint_states"/> <!-- listens to this topic to gather robot joint values -->
+  <arg name="motion_server" default="rosRobotSceneTrigger_joint_values"/>
+  <arg name="trigger_server" default="/IcalSrvObs"/>
+
+  <!-- arguments for ical_srv node -->
+  <arg name="yaml_file_path" default="$(find abb_irb2400_support)/yaml/"/>
+  <arg name="camera_file" default="cameras.yaml"/>
+  <arg name="target_file" default="targets.yaml"/>
+
+  <!-- Launch joint_traj node that maintains a data collection path -->
+  <node pkg="caljob_creator" type="joint_traj_node" name="joint_traj">
+    <param name="input_file" value="$(arg input_file)"/>
+    <param name="output_file" value="$(arg output_file)"/>
+    <param name="joints_topic" value="$(arg joints_topic)"/>
+    <param name="motion_server" value="$(arg motion_server)"/>
+    <param name="trigger_server" value="$(arg trigger_server)"/>
+  </node>
+
+  <!-- Launch robot intrinsic calibration node -->
+  <node pkg="intrinsic_cal" type="ical_srv" name="ical_service" output="screen" >
+	  <param name="yaml_file_path" value="$(arg yaml_file_path)"/>
+          <param name="camera_file" value="$(arg camera_file)"/>
+	  <param name="target_file" value="$(arg target_file)"/>
+  </node>
+
+  <!-- run r-viz, the camera, moveit etc 
+  <include file="$(find abb_irb2400_support)/launch/moveit_planning_and_execution.launch" />
+  -->
+
+  <!-- launch node to display results of each observation image -->
+  <node name="observation_view" pkg="image_view" type="image_view" >
+      <remap to="/observer_results_image" from="image"/>
+  </node>
+
+</launch>

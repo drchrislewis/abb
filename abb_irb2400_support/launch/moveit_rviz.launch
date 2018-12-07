@@ -1,0 +1,39 @@
+<launch>
+
+  <arg name="debug" default="false" />
+  <arg unless="$(arg debug)" name="launch_prefix" value="" />
+  <arg     if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
+
+  <arg name="config" default="false" />
+  <arg unless="$(arg config)" name="command_args" value="" />
+  <arg     if="$(arg config)" name="command_args" value="-d $(find abb_irb2400_support)/launch/moveit.rviz" />
+  
+  <node name="$(anon rviz)" launch-prefix="$(arg launch_prefix)" pkg="rviz" type="rviz" respawn="false"
+	args="$(arg command_args)" output="screen">
+    <rosparam command="load" file="$(find abb_irb2400_support)/config/kinematics.yaml"/>
+    <rosparam>
+      base_calibration_name: "/WristCalSrv"
+    </rosparam>
+
+  </node>
+
+  <node name="joint_traj" pkg="caljob_creator" type="joint_traj_node" output="screen">
+     <param name="input_file" value="$(find abb_irb2400_support)/yaml/joint_traj.yaml"/>
+     <param name="output_file" value="$(find abb_irb2400_support)/yaml/joint_traj_new.yaml"/>
+     <param name="motion_server" value="rosRobotSceneTrigger_joint_values"/>
+     <param name="joints_topic" value="/abb/joint_states"/>
+     <param name="trigger_server" value="/WristCalSrvObs"/>
+     <param name="pause_time" value="2.0"/>	
+  </node>
+
+  <node name="wrist_cal" pkg="industrial_extrinsic_cal" type="wrist_cal_srv" output="screen" >
+     <param name="yaml_file_path" value="$(find abb_irb2400_support)/yaml/"/>
+     <param name="camera_file" value="cameras.yaml"/>
+     <param name="target_file" value="targets.yaml"/>
+     <param name="target_mount_frame" value="world"/>
+     <param name="camera_mount_frame" value="tool0"/>
+     <param name="save_data" value="true"/>	
+     <param name="data_directory" value="(find abb_irb2400_support)/data"/>
+  </node>
+
+</launch>

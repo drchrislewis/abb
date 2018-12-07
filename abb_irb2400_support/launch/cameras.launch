@@ -1,0 +1,13 @@
+<launch>
+     <arg name="camera" default="astra" />
+     <arg name="rgb_camera_info_file" default="file://$(find abb_irb2400_support)/yaml/$(arg camera)_rgb_camera_info.yaml"/>
+     <arg name="depth_camera_info_file" default="file://$(find abb_irb2400_support)/yaml/$(arg camera)_depth_camera_info.yaml"/>	
+     <include file="$(find astra_launch)/launch/astra.launch">
+        <arg name="camera" value="$(arg camera)" />
+        <arg name="rgb_frame_id" value="$(arg camera)_rgb_optical_frame"/>
+        <arg name="depth_frame_id" value="$(arg camera)_depth_optical_frame"/>
+	<arg name="rgb_camera_info_url" value="$(arg rgb_camera_info_file)" />
+	<arg name="depth_camera_info_url" value="$(arg depth_camera_info_file)" />
+	<arg name="publish_tf" value="true" />
+     </include>
+</launch>
